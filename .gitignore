@@ -1,0 +1,7 @@
+**/*.exe
+**/*.cache
+**/*.dll
+**/*.AssemblyReference.cache
+**/*.dll
+**/*.pdb
+**/*.FileListAbsolute.txt
