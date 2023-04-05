@@ -1,0 +1,354 @@
+﻿// OLD CODE 27/12 goes square by square keeping just in case
+
+// See https://aka.ms/new-console-template for more information
+using Day22;
+
+using System.Collections.Specialized;
+using System.Reflection;
+
+Console.WriteLine("Day 22");
+
+string[] rows = File.ReadAllLines("data.txt");
+
+// on x = -26071..-15399, y = -54535..-33151, z = 64373..77023
+List<Cube> cubes = new List<Cube>();
+
+for(int j=0; j<rows.Length; j++)
+{
+    cubes.Add(new Cube(rows[j], j));
+}
+
+Console.WriteLine("Read {0} instructions", cubes.Count);
+
+bool[,,] initProcedureArea = new bool[101, 101, 101];
+
+int minx=0, maxx = 0, miny = 0, maxy = 0, minz = 0, maxz = 0;
+
+//BitVector32[,,] aaa = null;
+
+//List<Tuple<Int32,Int32,Int32>> onValues = new List<Tuple<Int32,Int32, Int32>>();
+
+foreach(Cube cube in cubes)
+{
+    if (cube.xStart < minx)
+        minx = cube.xStart;
+    if (cube.xEnd > maxx)
+        maxx = cube.xEnd;
+
+    if (cube.xStart < miny)
+        miny = cube.yStart;
+    if (cube.yEnd > maxx)
+        maxy = cube.yEnd;
+
+    if (cube.zStart < minz)
+        minz = cube.zStart;
+    if (cube.zEnd > maxz)
+        maxz = cube.zEnd;
+
+    //if (instruction.xStart < -50 || instruction.xStart > 50 ||
+    //    instruction.xEnd < -50 || instruction.xEnd > 50 ||
+    //    instruction.yStart < -50 || instruction.yStart > 50 ||
+    //    instruction.yEnd < -50 || instruction.yEnd > 50 ||
+    //    instruction.zStart < -50 || instruction.zStart > 50 ||
+    //    instruction.zEnd < -50 || instruction.zEnd > 50)
+    //    continue;
+
+    //for (int x = instruction.xStart; x <= instruction.xEnd; x++)
+    //    for (int y = instruction.yStart; y <= instruction.yEnd; y++)
+    //        for (int z = instruction.zStart; z <= instruction.zEnd; z++)
+    //            initProcedureArea[x+50, y+50, z+50] = instruction.On;
+
+    // Adding to list doesn't work. Too slow.
+    //for (int x = instruction.xStart; x <= instruction.xEnd; x++)
+    //    for (int y = instruction.yStart; y <= instruction.yEnd; y++)
+    //        for (int z = instruction.zStart; z <= instruction.zEnd; z++)
+    //        {
+    //            var tuple = new Tuple<Int32, Int32, Int32>(x, y, z);
+
+    //            if (instruction.On && !onValues.Contains(tuple))
+    //                onValues.Add(tuple);
+    //            else if (!instruction.On && onValues.Contains(tuple))
+    //                onValues.Remove(tuple);
+    //        }
+
+    //Console.WriteLine("# in List : {0}", onValues.Count());
+}
+
+//decimal count = 0;
+
+//instructions.Reverse();
+
+//for (int x = minx; x <= maxx; x++)
+//    for (int y = miny; y <= maxy; y++)
+//        for (int z = minz; z <= maxz; z++)
+//        {
+//            bool isBitOn = false;
+//            bool isBitInArea = false;
+
+//            foreach (Cube instruction in instructions)
+//            {
+//                isBitInArea = instruction.IsIn(x, y, z);
+
+//                if (isBitInArea)
+//                {
+//                    isBitOn = instruction.On;
+//                    break;
+//                }
+//            }
+
+//            if (isBitOn) count++;
+//        }
+
+//int count = 0;
+//for (int x = 0; x <= 100; x++)
+//    for (int y = 0; y <= 100; y++)
+//        for (int z = 0; z <= 100; z++)
+//            count += initProcedureArea[x, y, z] ? 1 : 0;
+
+//Console.WriteLine("Total on: {0}", count);
+
+
+
+int[] countIntersections = new int[60];
+int[] countIntersectionsOn = new int[60];
+int[] countIntersectionsOff = new int[60];
+
+for (int j = 0; j < 60; j++)
+{
+    countIntersections[j] = 0;
+    countIntersectionsOn[j] = 0;
+    countIntersectionsOff[j] = 0;
+
+}
+
+for (int j = 0; j < cubes.Count; j++)
+    for (int i = j + 1; i < cubes.Count; i++)
+        if (cubes[j].Intersects(cubes[i]))
+        {
+            Console.WriteLine("Cube {0} intersects with cube {1}", j, i);
+            countIntersections[j]++;
+            countIntersections[i]++;
+
+            if (cubes[i].On)
+                countIntersectionsOn[j]++;
+            else
+                countIntersectionsOff[j]++;
+
+            if (cubes[j].On)
+                countIntersectionsOn[i]++;
+            else
+                countIntersectionsOff[i]++;
+        }
+
+int totalIntersections = 0;
+for (int j = 0; j < cubes.Count(); j++)
+{
+    Console.WriteLine("Cube {0} (of type On={1}) has {2} intersections, #On: {3}, #Off: {4}, Volume: {5}", j, cubes[j].On, countIntersections[j], countIntersectionsOn[j], countIntersectionsOff[j], cubes[j].Volume());
+    totalIntersections += countIntersections[j];
+}
+
+Console.WriteLine("Total unique intersections {0}", totalIntersections/2);
+
+// part 1 - 653798
+
+// Limited approach - v1.0
+//List<Cube> intersections = new List<Cube>();
+//decimal volume = 0;
+
+//for (int j = 0; j < cubes.Count; j++)
+//{
+//        intersections.AddRange(cubes[j].FilterIntersectingCubes(cubes.GetRange(j+1, cubes.Count - j-1)));
+//        volume += cubes[j].Volume();
+//}
+
+//foreach(Cube cube in intersections)
+//{
+//    Console.WriteLine("Found intersection Type On={0}, of Volume {1}", cube.On, cube.Volume());
+
+//    if(cube.On)
+//        volume -= cube.Volume();
+//}
+
+//Console.WriteLine("Total summed up Volume: {0}", volume);
+
+//for(int j=0; j < 60; j++)
+//{
+//    if (!cubes[j].On)
+//        continue;
+
+//    List<Cube> intersections = cubes[j].FilterIntersectingCubes(cubes);
+
+//    int dimx = 0, dimy = 0, dimz = 0;
+//    dimx = cubes[j].xEnd - cubes[j].xStart;
+//    dimy = cubes[j].yEnd - cubes[j].yStart;
+//    dimz = cubes[j].zEnd - cubes[j].zStart;
+
+//    int[,,] smallcube = new int[dimx, dimy, dimz];
+//    foreach (Cube intersectingCube in intersections)
+//        for (int x = 0; x < dimx; x++)
+//            for (int y = 0; y < dimx; y++)
+//                for (int z = 0; z < dimx; z++)
+//                {
+//                    if(intersectingCube[x,y,z].On)
+
+
+//                }
+
+//    Console.WriteLine(intersections.Count());
+//}
+
+Console.WriteLine("===> Total on pixels={0}", HybridMethod(cubes));
+Console.ReadLine();
+
+
+decimal HybridMethod(List<Cube> cubes)
+{
+    decimal volume = 0;
+
+    // for each cube
+    for(int cubeNr=0; cubeNr<cubes.Count; cubeNr++)
+    {
+        // get the intersections
+        var intersections = cubes[cubeNr].FilterIntersectingCubes(cubes);
+
+        // declare a cube of pixels
+        int xsize = cubes[cubeNr].xEnd - cubes[cubeNr].xStart + 1;
+        int ysize = cubes[cubeNr].yEnd - cubes[cubeNr].yStart + 1;
+        int zsize = cubes[cubeNr].zEnd - cubes[cubeNr].zStart + 1;
+
+        // if we have enough memory for this
+        if (xsize * ysize * zsize < 500 * 500 * 500)
+        {
+            bool[,,] pixelGrid = new bool[xsize, ysize, zsize];
+
+            // initialize as per the cube's lightness
+            InitializeCube(pixelGrid, cubes[cubeNr].On);
+
+            // now to over each of the intersections in order and flip the pixels
+            foreach (Cube intersection in intersections)
+            {
+                // auxiliary variables for clarity only
+                int gridXStart = intersection.xStart - cubes[cubeNr].xStart;
+                int gridYStart = intersection.yStart - cubes[cubeNr].yStart;
+                int gridZStart = intersection.zStart - cubes[cubeNr].zStart;
+
+                int gridXend = gridXStart + intersection.xEnd - intersection.xStart;
+                int gridYend = gridYStart + intersection.yEnd - intersection.yStart;
+                int gridZend = gridZStart + intersection.zEnd - intersection.zStart;
+
+                for (int x = gridXStart; x <= gridXend; x++)
+                    for (int y = gridYStart; y <= gridYend; y++)
+                        for (int z = gridZStart; z <= gridZend; z++)
+                            pixelGrid[x, y, z] = intersection.On;
+            }
+
+            // and finally, count everything
+            decimal cubeVolume = CountOnPixels(pixelGrid);
+            volume += cubeVolume;
+            Console.WriteLine("On pixels per cube={0}", cubeVolume);
+        }
+        else
+        {
+            // let's optimize just for the test in the page
+            if(intersections.Count == 0)
+            {
+                decimal emptyCubeVolume = 0;
+
+                if (cubes[cubeNr].On)
+                    emptyCubeVolume = ((decimal)cubes[cubeNr].xEnd - cubes[cubeNr].xStart) * (cubes[cubeNr].yEnd - cubes[cubeNr].yStart) * (cubes[cubeNr].zEnd - cubes[cubeNr].zStart);
+
+                volume += emptyCubeVolume;
+                Console.WriteLine("On pixels per megacube={0} of cube {1}", emptyCubeVolume, cubeNr);
+
+                continue;
+            }
+
+            // we don't have ram for everything, so let's do it 500x500x500 cube by cube, assuming the max we can do is 500px cubes
+            int submegacubex = 0, submegacubey = 0, submegacubez = 0;
+
+            while (submegacubex < xsize)
+            {
+                while (submegacubey < ysize)
+                {
+                    while (submegacubez < zsize)
+                    {
+                        int gridsizex = xsize - submegacubex < 500 ? xsize - submegacubex : 500;
+                        int gridsizey = ysize - submegacubez < 500 ? xsize - submegacubey : 500;
+                        int gridsizez = zsize - submegacubey < 500 ? xsize - submegacubez : 500;
+
+                        bool[,,] pixelGrid = null;
+                        decimal cubeVolume = 0;
+
+                        // now to over each of the intersections in order and flip the pixels
+                        Cube megaCube = new Cube(cubes[cubeNr].On, cubes[cubeNr].xStart + submegacubex, cubes[cubeNr].xStart + gridsizex,
+                                                                   cubes[cubeNr].yStart + submegacubey, cubes[cubeNr].yStart + gridsizey,
+                                                                   cubes[cubeNr].zStart + submegacubez, cubes[cubeNr].zStart + gridsizez, cubeNr);
+
+                        var submegacubeintersections = megaCube.FilterIntersectingCubes(intersections);
+
+                        if (submegacubeintersections.Count > 0)
+                        {
+                            pixelGrid = new bool[gridsizex, gridsizey, gridsizez];
+
+                            // initialize as per the cube's lightness
+                            InitializeCube(pixelGrid, cubes[cubeNr].On);
+
+                            foreach (Cube intersection in submegacubeintersections)
+                            {
+                                // auxiliary variables for clarity only
+                                int gridXStart = intersection.xStart - cubes[cubeNr].xStart;
+                                int gridYStart = intersection.yStart - cubes[cubeNr].yStart;
+                                int gridZStart = intersection.zStart - cubes[cubeNr].zStart;
+
+                                int gridXend = gridXStart + intersection.xEnd - intersection.xStart;
+                                int gridYend = gridYStart + intersection.yEnd - intersection.yStart;
+                                int gridZend = gridZStart + intersection.zEnd - intersection.zStart;
+
+                                for (int x = gridXStart; x <= gridXend; x++)
+                                    for (int y = gridYStart; y <= gridYend; y++)
+                                        for (int z = gridZStart; z <= gridZend; z++)
+                                            pixelGrid[x, y, z] = intersection.On;
+                            }
+
+                            cubeVolume = CountOnPixels(pixelGrid);
+                        }
+                        else
+                        {
+                            if (megaCube.On)
+                                cubeVolume = (megaCube.xEnd - megaCube.xStart) * (megaCube.yEnd - megaCube.yStart) * (megaCube.zEnd - megaCube.zStart);
+                        }
+
+                        volume += cubeVolume;
+                        Console.WriteLine("On pixels per megacube={0} of cube {1}", cubeVolume, megaCube.CubeNumber);
+
+                        zsize += 500;
+                    }
+                    ysize += 500;
+                }
+                xsize += 500;
+            }
+        }
+    }
+
+    return volume;
+}
+
+void InitializeCube(bool[,,] pixelGrid, bool initValue)
+{
+    for (int x = 0; x < pixelGrid.GetLength(0); x++)
+        for (int y = 0; y < pixelGrid.GetLength(1); y++)
+            for (int z = 0; z < pixelGrid.GetLength(2); z++)
+                pixelGrid[x, y, z] = initValue;
+}
+
+decimal CountOnPixels(bool[,,] pixelGrid)
+{
+    decimal total = 0;
+
+    for (int x = 0; x < pixelGrid.GetLength(0); x++)
+        for (int y = 0; y < pixelGrid.GetLength(1); y++)
+            for (int z = 0; z < pixelGrid.GetLength(2); z++)
+                if (pixelGrid[x, y, z]) total++;
+
+    return total;
+}

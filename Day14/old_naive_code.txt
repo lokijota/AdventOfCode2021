@@ -1,0 +1,84 @@
+﻿// See https://aka.ms/new-console-template for more information
+using System.Text;
+
+Console.WriteLine("Hello, World!");
+
+string[] dataRows = File.ReadAllLines("data.txt");
+
+string polymerTemplate = dataRows[0];
+
+Dictionary<string, char> insertionRules = new Dictionary<string, char>();
+
+for(int j=2; j<dataRows.Length; j++)
+{
+    string[] insertionRule= dataRows[j].Replace(" -> ", "-").Split('-');
+    insertionRules.Add(insertionRule[0], insertionRule[1][0]);
+}
+
+Console.WriteLine("Template: {0}", polymerTemplate);
+Console.WriteLine("# of Insertion Rules: {0}", insertionRules.Count());
+
+string aux = string.Concat(polymerTemplate[0], polymerTemplate[1]);
+polymerTemplate = aux;
+
+StringBuilder polymer = new StringBuilder(polymerTemplate, 1000000000);
+
+for(int step=0; step<40; step++)
+{
+    int readIndex = 0;
+
+    while(readIndex < polymer.Length-1)
+    {
+        string lookingForPair = string.Concat(polymer[readIndex], polymer[readIndex + 1]);
+
+        if (insertionRules.ContainsKey(lookingForPair))
+        {
+            polymer.Insert(readIndex + 1, insertionRules[lookingForPair]);
+            readIndex += 2;
+        }
+        else
+        {
+            readIndex++;
+        }
+    }
+
+    Console.WriteLine("Step {0} - Polymer Size: {1}", step, polymer.Length);
+}
+
+
+
+// Do the counts -- this also has to be stacked
+Dictionary<char, int> counts = new Dictionary<char, int>();
+for(char c= 'A'; c!='Z'; c++)
+{
+    int freq = polymer.ToString().Count(f => (f == c));
+    if (freq > 0)
+        counts.Add(c, freq);
+}
+
+int max = 0;
+int maxChar = ' ';
+
+int min = Int32.MaxValue;
+int minChar = ' ';
+foreach(char c in counts.Keys)
+{
+    if(counts[c] > max)
+    {
+        max = counts[c];
+        maxChar = c;
+    }
+    if(counts[c] < min)
+    {
+        min = counts[c];
+        minChar = c;
+    } 
+}
+
+Console.WriteLine("Most often is '{0}', {1} times", (char) maxChar, max);
+Console.WriteLine("Less often is '{0}', {1} times", (char) minChar, min);
+Console.WriteLine("Difference is {0}", max - min);
+
+
+
+

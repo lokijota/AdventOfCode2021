@@ -1,0 +1,146 @@
+﻿using System.Text;
+
+// read the data
+string[] dataRows = File.ReadAllLines("data.txt");
+string polymerTemplate = dataRows[0];
+
+Dictionary<string, char> insertionRules = new Dictionary<string, char>();
+Dictionary<string, char> selfReferenceInsertionRules = new Dictionary<string, char>();
+
+for (int j = 2; j < dataRows.Length; j++)
+{
+    string[] insertionRule = dataRows[j].Replace(" -> ", "-").Split('-');
+    insertionRules.Add(insertionRule[0], insertionRule[1][0]);
+
+    if (insertionRule[0].Contains(insertionRule[1]))
+        selfReferenceInsertionRules.Add(insertionRule[0], insertionRule[1][0]);
+}
+
+Console.WriteLine("Template is: {0}", polymerTemplate);
+Console.WriteLine("# of Insertion Rules: {0}", insertionRules.Count());
+
+// process stuff
+Stack<StringBuilder> stack = new Stack<StringBuilder>();
+StringBuilder polymer = new StringBuilder(polymerTemplate, 10000);
+
+//for(int step=0; step<40; step++)
+//{
+//    int readIndex = 0;
+
+//    while(readIndex < polymer.Length-1)
+//    {
+//        string lookingForPair = string.Concat(polymer[readIndex], polymer[readIndex + 1]);
+
+//        if (insertionRules.ContainsKey(lookingForPair))
+//        {
+//            polymer.Insert(readIndex + 1, insertionRules[lookingForPair]);
+//            readIndex += 2;
+//        }
+//        else
+//        {
+//            readIndex++;
+//        }
+//    }
+
+//    Console.WriteLine("Step {0} - Polymer Size: {1}", step, polymer.Length);
+//}
+
+UInt64[] frequencyCounts = new UInt64[26];
+for (int i = 0; i < frequencyCounts.Length; i++) frequencyCounts[i] = 0;
+
+polymer = new StringBuilder(polymer.ToString(0, 2));
+
+stack.Push(polymer);
+
+while(stack.Count>0)
+{
+    StringBuilder part = stack.Pop();
+
+    for (int i = 0; i < 4; i++)
+    {
+        stack.Push(new StringBuilder(part.ToString(1, part.Length - 1)));
+        part = new StringBuilder(part.ToString(0, 2));
+        part = doReplacements(10, part);
+    }
+
+    // when I get here, I have what's left of processing the first character in 4 parts of 10 steps each
+    doCounts(part);
+    // we don't need part anymore, so we can just ignore and pop the next bit
+}
+
+
+
+
+
+
+
+StringBuilder doReplacements(int howMany, StringBuilder polymerPart)
+{
+    for (int step = 0; step < howMany; step++)
+    {
+        int readIndex = 0;
+
+        while (readIndex < polymerPart.Length - 1)
+        {
+            string lookingForPair = string.Concat(polymerPart[readIndex], polymerPart[readIndex + 1]); // woukd substring be faster?
+
+            if (insertionRules.ContainsKey(lookingForPair))
+            {
+                polymerPart.Insert(readIndex + 1, insertionRules[lookingForPair]);
+                readIndex += 2;
+            }
+            else
+            {
+                readIndex++;
+            }
+        }
+
+        //Console.WriteLine("Step {0} - Polymer Size: {1}", step, polymer.Length);
+    }
+
+    return polymerPart;
+}
+
+void doCounts(StringBuilder someString)
+{
+    for (char c = 'A'; c != 'Z'; c++)
+    {
+        int freq = someString.ToString().Count(f => (f == c));
+        frequencyCounts[(int)c - (int)'A'] += (UInt64) freq;
+    }
+}
+
+
+//// Do the counts -- this also has to be stacked
+//Dictionary<char, int> counts = new Dictionary<char, int>();
+
+
+//int max = 0;
+//int maxChar = ' ';
+
+//int min = Int32.MaxValue;
+//int minChar = ' ';
+//foreach(char c in counts.Keys)
+//{
+//    if(counts[c] > max)
+//    {
+//        max = counts[c];
+//        maxChar = c;
+//    }
+//    if(counts[c] < min)
+//    {
+//        min = counts[c];
+//        minChar = c;
+//    } 
+//}
+
+//Console.WriteLine("Most often is '{0}', {1} times", (char) maxChar, max);
+//Console.WriteLine("Less often is '{0}', {1} times", (char) minChar, min);
+//Console.WriteLine("Difference is {0}", max - min);
+
+for(int theChar=0; theChar< 26; theChar++)
+{
+    Console.WriteLine("Char '{0}' appears {1} times", ((char)(theChar + (int)'A')).ToString(), frequencyCounts[theChar]);
+}
+
+

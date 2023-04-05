@@ -1,0 +1,103 @@
+﻿// See https://aka.ms/new-console-template for more information
+
+Console.WriteLine("Day 14");
+string[] map = File.ReadAllLines("data.txt");
+
+const int MAPSIZE = 100;
+
+
+bool[,] positionsVisited= new bool[MAPSIZE, MAPSIZE];
+int[,] minimumDistanceMap = new int[MAPSIZE, MAPSIZE];
+
+positionsVisited[0, 0] = true;
+for (int r = 0; r < MAPSIZE; r++)
+    for (int c = 0; c < MAPSIZE; c++)
+        minimumDistanceMap[r, c] = int.MaxValue; // can give it 450 to see it run much faster with size 100x100
+
+
+
+
+
+// y, x => row, column
+Tuple<int, int> startingPos = new Tuple<int, int>(0, 0);
+Tuple<int, int> targetPos = new Tuple<int, int>(MAPSIZE-1, MAPSIZE - 1);
+
+
+List<string> bestPath = new List<string>();
+int bestPathRisk = int.MaxValue;
+
+FindBestPath(startingPos, 0, bestPath);
+
+string newPos = String.Empty;
+
+void FindBestPath(Tuple<int, int> currentPosition, int currentPathRisk, List<string> currentPath)
+{
+    // stopping condition
+    if (currentPosition.Item1 == MAPSIZE - 1 && currentPosition.Item2 == MAPSIZE - 1)
+    {
+        // it's a better path
+        if (currentPathRisk < bestPathRisk)
+        {
+            bestPathRisk = currentPathRisk;
+            bestPath = currentPath;
+
+            Console.WriteLine("Best path found, total risk = {0}", bestPathRisk);
+            return;
+        }
+        else
+            return;
+    }
+
+    if (minimumDistanceMap[currentPosition.Item1, currentPosition.Item2] < currentPathRisk)
+        return; // stop searching
+    else
+        minimumDistanceMap[currentPosition.Item1, currentPosition.Item2] = currentPathRisk;
+
+
+    // stop searching optimizations
+    int bestCaseDistance = MAPSIZE - 1 - currentPosition.Item1 + MAPSIZE - 1 - currentPosition.Item2;
+    if (currentPathRisk + bestCaseDistance >= bestPathRisk)
+        return;
+
+
+    // generate path options
+    Tuple<int, int>[] positions = new Tuple<int, int>[4];
+
+    // try to go in a diagonal
+    if ((currentPosition.Item1 + currentPosition.Item2) % 2 == 0)
+    {
+        positions[0] = new Tuple<int, int>(currentPosition.Item1 + 1, currentPosition.Item2);
+        positions[1] = new Tuple<int, int>(currentPosition.Item1, currentPosition.Item2 + 1);
+        positions[2] = new Tuple<int, int>(currentPosition.Item1 - 1, currentPosition.Item2);
+        positions[3] = new Tuple<int, int>(currentPosition.Item1, currentPosition.Item2 - 1);
+    }
+    else
+    {
+        positions[0] = new Tuple<int, int>(currentPosition.Item1, currentPosition.Item2 + 1);
+        positions[1] = new Tuple<int, int>(currentPosition.Item1 + 1, currentPosition.Item2);
+        positions[2] = new Tuple<int, int>(currentPosition.Item1 - 1, currentPosition.Item2);
+        positions[3] = new Tuple<int, int>(currentPosition.Item1, currentPosition.Item2 - 1);
+    }
+
+    // no go over all of them
+    foreach (Tuple<int, int> newPosition in positions)
+    {
+        if (newPosition.Item1 >= MAPSIZE || newPosition.Item2 >= MAPSIZE || newPosition.Item1 < 0  || newPosition.Item2 < 0 || positionsVisited[newPosition.Item1, newPosition.Item2])
+            continue; // skip, invalid coordinate, OR skip, already visited
+
+        // Add to path
+        //currentPath.Add(newPos);
+
+        currentPathRisk += (int)map[newPosition.Item1][newPosition.Item2] - (int)'0';
+        positionsVisited[newPosition.Item1, newPosition.Item2] = true;
+        
+        // call myself
+        FindBestPath(newPosition, currentPathRisk, currentPath);
+
+        // remove from path
+        //currentPath.RemoveAt(currentPath.Count-1);
+        positionsVisited[newPosition.Item1, newPosition.Item2] = false;
+        currentPathRisk -= (int)map[newPosition.Item1][newPosition.Item2] - (int)'0';
+    }
+
+}

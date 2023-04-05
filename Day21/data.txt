@@ -1,0 +1,20 @@
+﻿Player 1 starting position: 7
+Player 2 starting position: 4
+
+Notas:
+
+
+sum 3: 111
+sum 4: 112, 121, 211
+sum 5: 122, 212, 221 + 113 131 311
+sum 6: 222 + 123 132 213 231 312 321
+sum 7: 322 232 223 + 331 133 313
+sum 8: 332 323 233
+sum 9: 333
+
+Total 27
+
+
+Em termos de posições de jogadores, há 10*10 posições
+
+Em termos de scores potenciais, há inúmeras combinações
